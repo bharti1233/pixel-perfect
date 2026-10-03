@@ -33,7 +33,7 @@ confidence: number 0-1
 Then add APPROXIMATE parametric estimates in millimetres for 3D model generation.
 These are estimates based on typical adult sizes, not measured values. Keys:
 When category is "glasses":
-  frameShape: one of "rectangular" | "round" | "square" | "oval" | "aviator" | "cateye" | "wayfarer"
+  frameShape: one of "rectangular" | "round" | "square" | "oval" | "aviator" | "cateye" | "wayfarer" | "custom"
   frameWidth: total front width, typically 135-155
   lensWidth: typically 40-62
   lensHeight: typically 30-55
@@ -44,6 +44,56 @@ When category is "glasses":
   lensColor: hex
   lensOpacity: number 0-1 (clear lenses ~0.15, sunglasses ~0.75)
   lensType: "clear" | "tinted" | "mirror" | "none"
+  
+  For detailed geometry (when frameShape is "custom"):
+  frame:
+    overall_width: number (mm)
+    overall_height: number (mm)
+    front_depth: number (mm)
+    left_lens_width: number (mm)
+    right_lens_width: number (mm)
+    left_lens_height: number (mm)
+    right_lens_height: number (mm)
+    lens_corner_radius: number (mm)
+    bridge_width: number (mm)
+    bridge_height: number (mm)
+    frame_thickness: number (mm)
+    rim_thickness: number (mm)
+    lens_gap: number (mm)
+  nose:
+    nose_pad_present: boolean
+    nose_pad_position: "front" | "mid" | "back" | null
+    nose_pad_size: number (mm) | null
+    bridge_nose_clearance: number (mm) | null
+  temples:
+    left_temple_length: number (mm)
+    right_temple_length: number (mm)
+    temple_thickness: number (mm)
+    temple_width: number (mm)
+    temple_curve: "straight" | "light_curve" | "heavy_curve"
+    hinge_position: "outer_upper" | "outer_center" | "outer_lower" | null
+    hinge_size: number (mm) | null
+    temple_angle: number (degrees) | null
+  3d:
+    front_face_curvature: number (mm) | null
+    lens_curvature: number (mm) | null
+    frame_depth: number (mm) | null
+    temple_depth: number (mm) | null
+    head_wrap_angle: number (degrees) | null
+  appearance:
+    frame_color: hex
+    frame_material_appearance: "matte" | "glossy" | "metallic" | "tortoise" | null
+    lens_tint: hex
+    lens_transparency: number (0-1)
+    surface_finish: "matte" | "glossy" | "textured" | null
+  confidence:
+    geometry_confidence: number (0-1)
+    measurement_confidence: number (0-1)
+  perspective:
+    estimated_camera_yaw: number (degrees) | null
+    estimated_camera_pitch: number (degrees) | null
+    estimated_camera_roll: number (degrees) | null
+    perspective_confidence: number (0-1) | null
 When category is "hats":
   hatType: one of "cap" | "beanie" | "fedora" | "bucket" | "visor" | "other"
   hatWidth: side-to-side crown width, typically 170-210
@@ -82,7 +132,16 @@ function buildParameters(
     return {
       frameShape: pick(
         p["frameShape"],
-        ["rectangular", "round", "square", "oval", "aviator", "cateye", "wayfarer"] as const,
+        [
+          "rectangular",
+          "round",
+          "square",
+          "oval",
+          "aviator",
+          "cateye",
+          "wayfarer",
+          "custom",
+        ] as const,
         DEFAULT_GLASSES.frameShape,
       ),
       frameWidth: num(p["frameWidth"], 120, 180, DEFAULT_GLASSES.frameWidth),
@@ -99,6 +158,222 @@ function buildParameters(
         ["clear", "tinted", "mirror", "none"] as const,
         DEFAULT_GLASSES.lensType,
       ),
+      frame:
+        p["frame"] && typeof p["frame"] === "object"
+          ? {
+              overall_width: num(
+                (p["frame"] as Record<string, unknown>)["overall_width"],
+                120,
+                200,
+                140,
+              ),
+              overall_height: num(
+                (p["frame"] as Record<string, unknown>)["overall_height"],
+                30,
+                80,
+                45,
+              ),
+              front_depth: num((p["frame"] as Record<string, unknown>)["front_depth"], 5, 20, 10),
+              left_lens_width: num(
+                (p["frame"] as Record<string, unknown>)["left_lens_width"],
+                40,
+                80,
+                50,
+              ),
+              right_lens_width: num(
+                (p["frame"] as Record<string, unknown>)["right_lens_width"],
+                40,
+                80,
+                50,
+              ),
+              left_lens_height: num(
+                (p["frame"] as Record<string, unknown>)["left_lens_height"],
+                20,
+                60,
+                40,
+              ),
+              right_lens_height: num(
+                (p["frame"] as Record<string, unknown>)["right_lens_height"],
+                20,
+                60,
+                40,
+              ),
+              lens_corner_radius: num(
+                (p["frame"] as Record<string, unknown>)["lens_corner_radius"],
+                0,
+                20,
+                5,
+              ),
+              bridge_width: num(
+                (p["frame"] as Record<string, unknown>)["bridge_width"],
+                10,
+                30,
+                18,
+              ),
+              bridge_height: num(
+                (p["frame"] as Record<string, unknown>)["bridge_height"],
+                2,
+                12,
+                6,
+              ),
+              frame_thickness: num(
+                (p["frame"] as Record<string, unknown>)["frame_thickness"],
+                2,
+                12,
+                4,
+              ),
+              rim_thickness: num(
+                (p["frame"] as Record<string, unknown>)["rim_thickness"],
+                2,
+                10,
+                4,
+              ),
+              lens_gap: num((p["frame"] as Record<string, unknown>)["lens_gap"], 2, 20, 4),
+            }
+          : undefined,
+      nose:
+        p["nose"] && typeof p["nose"] === "object"
+          ? {
+              nose_pad_present: (p["nose"] as Record<string, unknown>)["nose_pad_present"] as
+                boolean | null,
+              nose_pad_position: (p["nose"] as Record<string, unknown>)["nose_pad_position"] as
+                "front" | "mid" | "back" | null,
+              nose_pad_size: num((p["nose"] as Record<string, unknown>)["nose_pad_size"], 0, 10, 3),
+              bridge_nose_clearance: num(
+                (p["nose"] as Record<string, unknown>)["bridge_nose_clearance"],
+                0,
+                10,
+                2,
+              ),
+            }
+          : undefined,
+      temples:
+        p["temples"] && typeof p["temples"] === "object"
+          ? {
+              left_temple_length: num(
+                (p["temples"] as Record<string, unknown>)["left_temple_length"],
+                100,
+                180,
+                140,
+              ),
+              right_temple_length: num(
+                (p["temples"] as Record<string, unknown>)["right_temple_length"],
+                100,
+                180,
+                140,
+              ),
+              temple_thickness: num(
+                (p["temples"] as Record<string, unknown>)["temple_thickness"],
+                2,
+                10,
+                4,
+              ),
+              temple_width: num(
+                (p["temples"] as Record<string, unknown>)["temple_width"],
+                2,
+                12,
+                5,
+              ),
+              temple_curve: (p["temples"] as Record<string, unknown>)["temple_curve"] as
+                "straight" | "light_curve" | "heavy_curve" | null,
+              hinge_position: (p["temples"] as Record<string, unknown>)["hinge_position"] as
+                "outer_upper" | "outer_center" | "outer_lower" | null,
+              hinge_size: num((p["temples"] as Record<string, unknown>)["hinge_size"], 0, 10, 3),
+              temple_angle: num(
+                (p["temples"] as Record<string, unknown>)["temple_angle"],
+                0,
+                30,
+                10,
+              ),
+            }
+          : undefined,
+      "3d":
+        p["3d"] && typeof p["3d"] === "object"
+          ? {
+              front_face_curvature: num(
+                (p["3d"] as Record<string, unknown>)["front_face_curvature"],
+                0,
+                50,
+                0,
+              ),
+              lens_curvature: num((p["3d"] as Record<string, unknown>)["lens_curvature"], 0, 30, 0),
+              frame_depth: num((p["3d"] as Record<string, unknown>)["frame_depth"], 5, 20, 10),
+              temple_depth: num((p["3d"] as Record<string, unknown>)["temple_depth"], 50, 200, 100),
+              head_wrap_angle: num(
+                (p["3d"] as Record<string, unknown>)["head_wrap_angle"],
+                0,
+                30,
+                10,
+              ),
+            }
+          : undefined,
+      appearance:
+        p["appearance"] && typeof p["appearance"] === "object"
+          ? {
+              frame_color: hex(
+                (p["appearance"] as Record<string, unknown>)["frame_color"],
+                "#222222",
+              ),
+              frame_material_appearance: (p["appearance"] as Record<string, unknown>)[
+                "frame_material_appearance"
+              ] as "matte" | "glossy" | "metallic" | "tortoise" | null,
+              lens_tint: hex((p["appearance"] as Record<string, unknown>)["lens_tint"], "#8899aa"),
+              lens_transparency: num(
+                (p["appearance"] as Record<string, unknown>)["lens_transparency"],
+                0,
+                1,
+                0.8,
+              ),
+              surface_finish: (p["appearance"] as Record<string, unknown>)["surface_finish"] as
+                "matte" | "glossy" | "textured" | null,
+            }
+          : undefined,
+      confidence:
+        p["confidence"] && typeof p["confidence"] === "object"
+          ? {
+              geometry_confidence: num(
+                (p["confidence"] as Record<string, unknown>)["geometry_confidence"],
+                0,
+                1,
+                0.7,
+              ),
+              measurement_confidence: num(
+                (p["confidence"] as Record<string, unknown>)["measurement_confidence"],
+                0,
+                1,
+                0.7,
+              ),
+            }
+          : undefined,
+      perspective:
+        p["perspective"] && typeof p["perspective"] === "object"
+          ? {
+              estimated_camera_yaw: num(
+                (p["perspective"] as Record<string, unknown>)["estimated_camera_yaw"],
+                -90,
+                90,
+                0,
+              ),
+              estimated_camera_pitch: num(
+                (p["perspective"] as Record<string, unknown>)["estimated_camera_pitch"],
+                -90,
+                90,
+                0,
+              ),
+              estimated_camera_roll: num(
+                (p["perspective"] as Record<string, unknown>)["estimated_camera_roll"],
+                -90,
+                90,
+                0,
+              ),
+              perspective_confidence: num(
+                (p["perspective"] as Record<string, unknown>)["perspective_confidence"],
+                0,
+                1,
+                0.8,
+              ),
+            }
+          : undefined,
     };
   }
   if (category === "hats") {

@@ -74,6 +74,9 @@ export function composeFace(lm: Landmark3[] | undefined, m: CoverMapping): FaceT
   const frame = buildHeadFrame(wEyeA, wEyeB, wTop, wChin);
   if (!frame) return null;
 
+  const bridge = lm[FACE_IDX.bridge];
+  const wBridge = bridge ? toWorld(m, bridge) : undefined;
+
   return {
     present: true,
     eyeMid: mid(wEyeA, wEyeB),
@@ -82,6 +85,7 @@ export function composeFace(lm: Landmark3[] | undefined, m: CoverMapping): FaceT
     headHeight: dist(wTop, wChin),
     topOfHead: wTop,
     noseTip: toWorld(m, nose),
+    noseBridge: wBridge,
     rotation: headRotation(frame),
   };
 }

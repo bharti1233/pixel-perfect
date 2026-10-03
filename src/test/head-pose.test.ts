@@ -165,6 +165,7 @@ describe("3D fitting (mm parametric -> world px)", () => {
     headHeight: 360,
     topOfHead: { x: 0, y: 180, z: 0 },
     noseTip: { x: 0, y: 5, z: -30 },
+    noseBridge: { x: 0, y: 10, z: -15 },
     rotation: { quaternion: { x: 0, y: 0, z: 0, w: 1 }, pitch: 0, yaw: 0, roll: 0 },
   };
 
@@ -173,9 +174,10 @@ describe("3D fitting (mm parametric -> world px)", () => {
     const t = fitGlasses(face, params);
     expect(t.scale).toBeCloseTo(140 / 70, 5);
     // 12mm standoff in front of the eye plane
-    expect(t.position.z).toBeCloseTo((12 * 140) / 70, 5);
-    expect(t.position.x).toBeCloseTo(10, 5);
-    expect(t.position.y).toBeCloseTo(20, 5);
+    expect(t.position.z).toBeCloseTo((12 * 140) / 70 - 15, 5);
+    // Uses nose bridge as anchor when available
+    expect(t.position.x).toBeCloseTo(0, 5);
+    expect(t.position.y).toBeCloseTo(10, 5);
   });
 
   it("scales hats from anatomical face width and anchors below the crown", () => {

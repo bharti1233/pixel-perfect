@@ -115,6 +115,18 @@ function lensOutline(kind: ShapeKind, w: number, h: number, side: 1 | -1): THREE
       ];
       return roundedPolygon(pts, Math.min(w, h) * 0.18);
     }
+    case "custom":
+      // Fallback to rounded rectangle when no detailed custom points are available
+      // The detailed geometry from Gemini will be used in a future enhancement
+      return roundedPolygon(
+        [
+          [-w / 2, -h / 2],
+          [w / 2, -h / 2],
+          [w / 2, h / 2],
+          [-w / 2, h / 2],
+        ],
+        Math.min(w, h) * 0.22,
+      );
     case "rectangular":
     default:
       return roundedPolygon(

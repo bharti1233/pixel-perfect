@@ -32,6 +32,8 @@ export interface FaceTracking {
   /** top of the head (landmark 10) — hat anchor */
   topOfHead: Vec3;
   noseTip: Vec3;
+  /** nose bridge landmark (landmark 168) — primary bridge anchor */
+  noseBridge?: Vec3 | undefined;
   /** smoothed head rotation (quaternion + debug Euler) */
   rotation: HeadRotation;
 }
