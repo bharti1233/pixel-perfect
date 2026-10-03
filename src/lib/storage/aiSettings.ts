@@ -5,6 +5,8 @@
  * Extends the existing settings abstraction.
  */
 
+import { DEFAULT_MODEL_ID, isValidModel } from "@/lib/ai/models";
+
 const AI_SETTINGS_KEY = "style-mirror-ai-settings";
 
 export interface AISettings {
@@ -34,9 +36,20 @@ function saveAISettings(settings: AISettings): void {
 /** Get the currently selected model ID. */
 export function getSelectedModelId(): string {
   const settings = loadAISettings();
-  if (settings.selectedModelId) return settings.selectedModelId;
-  // Return default model ID if not set
-  return "gemini-1.5-flash";
+  const savedModelId = settings.selectedModelId;
+
+  if (savedModelId) {
+    // Check if the saved model is still supported
+    if (isValidModel(savedModelId)) {
+      return savedModelId;
+    }
+    // Model is no longer supported - reset to default
+    resetSelectedModel();
+    return DEFAULT_MODEL_ID;
+  }
+
+  // No saved model - use default
+  return DEFAULT_MODEL_ID;
 }
 
 /** Get all enabled models (for UI display). */

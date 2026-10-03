@@ -30,31 +30,31 @@ describe("AI Settings Storage", () => {
 
   it("returns default model when no setting is stored", async () => {
     const { getSelectedModelId } = await import("@/lib/storage/aiSettings");
-    expect(getSelectedModelId()).toBe("gemini-1.5-flash");
+    expect(getSelectedModelId()).toBe("gemini-2.5-flash");
   });
 
   it("saves and retrieves selected model ID", async () => {
     const { setSelectedModelId, getSelectedModelId } = await import("@/lib/storage/aiSettings");
-    setSelectedModelId("gemini-1.5-pro");
-    expect(getSelectedModelId()).toBe("gemini-1.5-pro");
+    setSelectedModelId("gemini-2.5-pro");
+    expect(getSelectedModelId()).toBe("gemini-2.5-pro");
   });
 
   it("persists model selection across module reloads", async () => {
     const { setSelectedModelId } = await import("@/lib/storage/aiSettings");
-    setSelectedModelId("gemini-1.5-pro");
+    setSelectedModelId("gemini-2.5-pro");
 
     // Simulate module reload by getting fresh import
     vi.resetModules();
     const { getSelectedModelId } = await import("@/lib/storage/aiSettings");
-    expect(getSelectedModelId()).toBe("gemini-1.5-pro");
+    expect(getSelectedModelId()).toBe("gemini-2.5-pro");
   });
 
   it("resets to default model", async () => {
     const { setSelectedModelId, resetSelectedModel, getSelectedModelId } =
       await import("@/lib/storage/aiSettings");
-    setSelectedModelId("gemini-1.5-pro");
+    setSelectedModelId("gemini-2.5-pro");
     resetSelectedModel();
-    expect(getSelectedModelId()).toBe("gemini-1.5-flash");
+    expect(getSelectedModelId()).toBe("gemini-2.5-flash");
   });
 });
 
@@ -115,19 +115,75 @@ describe("AI Models Configuration", () => {
   it("has default model", async () => {
     const { getDefaultModel } = await import("@/lib/ai/models");
     const model = getDefaultModel();
-    expect(model.id).toBe("gemini-1.5-flash");
+    expect(model.id).toBe("gemini-2.5-flash");
   });
 
   it("can get model by ID", async () => {
     const { getModelById } = await import("@/lib/ai/models");
-    const model = getModelById("gemini-1.5-pro");
+    const model = getModelById("gemini-2.5-pro");
     expect(model).toBeDefined();
-    expect(model?.id).toBe("gemini-1.5-pro");
+    expect(model?.id).toBe("gemini-2.5-pro");
   });
 
   it("validates model ID", async () => {
     const { isValidModel } = await import("@/lib/ai/models");
-    expect(isValidModel("gemini-1.5-flash")).toBe(true);
+    expect(isValidModel("gemini-2.5-flash")).toBe(true);
     expect(isValidModel("invalid-model")).toBe(false);
+  });
+
+  it("includes Gemini 2.5 Flash", async () => {
+    const { getModelById } = await import("@/lib/ai/models");
+    const model = getModelById("gemini-2.5-flash");
+    expect(model).toBeDefined();
+    expect(model?.displayName).toBe("Gemini 2.5 Flash");
+  });
+
+  it("includes Gemini 2.5 Flash-Lite", async () => {
+    const { getModelById } = await import("@/lib/ai/models");
+    const model = getModelById("gemini-2.5-flash-lite");
+    expect(model).toBeDefined();
+    expect(model?.displayName).toBe("Gemini 2.5 Flash-Lite");
+  });
+
+  it("includes Gemini 2.5 Pro", async () => {
+    const { getModelById } = await import("@/lib/ai/models");
+    const model = getModelById("gemini-2.5-pro");
+    expect(model).toBeDefined();
+    expect(model?.displayName).toBe("Gemini 2.5 Pro");
+  });
+
+  it("includes Gemini 3.5 Flash", async () => {
+    const { getModelById } = await import("@/lib/ai/models");
+    const model = getModelById("gemini-3.5-flash");
+    expect(model).toBeDefined();
+    expect(model?.displayName).toBe("Gemini 3.5 Flash");
+  });
+
+  it("includes Gemini 3.5 Flash-Lite", async () => {
+    const { getModelById } = await import("@/lib/ai/models");
+    const model = getModelById("gemini-3.5-flash-lite");
+    expect(model).toBeDefined();
+    expect(model?.displayName).toBe("Gemini 3.5 Flash-Lite");
+  });
+
+  it("includes Gemini 3.8 Flash", async () => {
+    const { getModelById } = await import("@/lib/ai/models");
+    const model = getModelById("gemini-3.8-flash");
+    expect(model).toBeDefined();
+    expect(model?.displayName).toBe("Gemini 3.8 Flash");
+  });
+
+  it("does not include old Gemini 1.5 models", async () => {
+    const { getModelById } = await import("@/lib/ai/models");
+    expect(getModelById("gemini-1.5-flash")).toBeUndefined();
+    expect(getModelById("gemini-1.5-pro")).toBeUndefined();
+    expect(getModelById("gemini-1.5-flash-8b")).toBeUndefined();
+  });
+
+  it("default model is Gemini 2.5 Flash", async () => {
+    const { getDefaultModel } = await import("@/lib/ai/models");
+    const model = getDefaultModel();
+    expect(model.id).toBe("gemini-2.5-flash");
+    expect(model.displayName).toBe("Gemini 2.5 Flash");
   });
 });

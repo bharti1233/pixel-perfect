@@ -323,17 +323,36 @@ function SettingsPage() {
                             modelId === model.id
                               ? "bg-primary/10 text-primary"
                               : "hover:bg-secondary"
-                          } flex items-center justify-between`}
+                          } flex items-start justify-between`}
                           role="option"
                           aria-selected={modelId === model.id}
                         >
-                          <span>{model.displayName}</span>
-                          {modelId === model.id && <CheckCircle className="h-5 w-5 text-primary" />}
+                          <div>
+                            <p className="font-medium">{model.displayName}</p>
+                            <p className="text-xs text-muted-foreground">{model.description}</p>
+                          </div>
+                          {modelId === model.id && (
+                            <CheckCircle className="h-5 w-5 text-primary mt-1" />
+                          )}
                         </button>
                       ))}
                     </div>
                   )}
                 </div>
+
+                {/* Current model info */}
+                {getCurrentModel() && (
+                  <div className="rounded-xl bg-secondary p-3 text-sm">
+                    <p className="font-medium">{getCurrentModel()?.displayName}</p>
+                    <p className="text-muted-foreground mt-1">{getCurrentModel()?.description}</p>
+                    {getCurrentModel()?.status === "limited" && (
+                      <p className="text-xs text-amber-500 mt-1">⚠ Limited availability</p>
+                    )}
+                    {getCurrentModel()?.status === "experimental" && (
+                      <p className="text-xs text-amber-500 mt-1">⚠ Experimental</p>
+                    )}
+                  </div>
+                )}
 
                 <div className="flex gap-2">
                   <button
@@ -353,32 +372,23 @@ function SettingsPage() {
 
                 {modelTestResult === "success" && (
                   <p className="text-sm text-green-500 flex items-center gap-1">
-                    <CheckCircle className="h-4 w-4" /> Model connection successful
+                    <CheckCircle className="h-4 w-4" /> Model available
                   </p>
                 )}
                 {modelTestResult === "error" && (
                   <p className="text-sm text-destructive flex items-center gap-1">
-                    <XCircle className="h-4 w-4" /> Model test failed. Check your API key and model
-                    availability.
+                    <XCircle className="h-4 w-4" /> Model unavailable or API key invalid. Check your
+                    API key and model access.
                   </p>
                 )}
 
                 <p className="text-xs text-muted-foreground">
-                  Current model: <code className="font-mono">{modelId}</code>
-                  {getCurrentModel()?.capabilities && (
-                    <>
-                      {" | Capabilities: "}
-                      <span className="font-mono">
-                        {[
-                          getCurrentModel()?.capabilities.vision && "Vision",
-                          getCurrentModel()?.capabilities.structuredOutput && "Structured Output",
-                          getCurrentModel()?.capabilities.jsonMode && "JSON Mode",
-                        ]
-                          .filter(Boolean)
-                          .join(", ")}
-                      </span>
-                    </>
-                  )}
+                  Current model ID: <code className="font-mono">{modelId}</code>
+                </p>
+
+                <p className="text-xs text-muted-foreground mt-2">
+                  Free tier availability depends on your Google AI Studio/API project. Gemini 2.5
+                  Flash has a free tier but usage is still controlled by Google's API quota.
                 </p>
               </div>
             </div>
